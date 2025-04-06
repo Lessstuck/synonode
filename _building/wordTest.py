@@ -1,4 +1,4 @@
-# OSC setup
+# OSC client (Python to Max) #########################
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
 from pythonosc.udp_client import SimpleUDPClient
@@ -8,25 +8,21 @@ portSend = 1338
 
 client = SimpleUDPClient(ip, portSend)  # Create client
 
-# BERT
+# BERT ################################################
 
 from transformers import BertTokenizer
 bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 text = "cat dog tail car run"
-
+query_text = "cat"
 
 bert_inputs = bert_tokenizer(text, return_tensors='pt')
-print("Token IDs:", bert_inputs['input_ids'])
 attention_mask = bert_inputs['attention_mask']
-print("Attention Mask:", attention_mask)
 token_type_ids = bert_inputs['token_type_ids']
-print("Token Type IDs:", token_type_ids)
-# Print the tokens themselves to understand the splits
 tokens = bert_tokenizer.convert_ids_to_tokens(bert_inputs['input_ids'][0])
-print("Tokens:", tokens)
+# print("Tokens:", tokens)
 
-# embed
+# Embed
 from transformers import BertModel
 import torch
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -37,14 +33,8 @@ inputs = tokenizer(text, return_tensors='pt')
 # Obtain the embeddings
 with torch.no_grad():
     outputs = model(**inputs)
-# Extract the last hidden state (embeddings)
 last_hidden_states = outputs.last_hidden_state
-# Print the dimensions of the embeddings
-print("Shape of the last hidden state (embeddings):", last_hidden_states.shape)
-# Print embeddings for each token along with their vector dimension
 tokens = tokenizer.convert_ids_to_tokens(inputs['input_ids'][0])
-for token, embedding in zip(tokens, last_hidden_states[0]):
-    print(f"Token: {token}, Embedding Dimension: {embedding.shape}, Embedding (first 5 components): {embedding[:5]}...")  # Display first 5 components for brevity
 
 # test similarity
 import numpy as np
@@ -58,40 +48,34 @@ def get_word_embedding(text):
     word_embedding = torch.mean(last_hidden_states, dim=1).numpy()
     return word_embedding
 
-# Example texts
+# Vocabulary
 texts = [
     "cat",
     "dog",
-    "car"
+    "tail",
+    "car",
+    "run"
 ]
 
 # Generate embeddings for texts
 embeddings = [get_word_embedding(text) for text in texts]
 
-# Query text
-query_text = "dog"
-query_embedding = get_word_embedding(query_text)
-
-# Compute cosine similarities
-similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
-
-# Print query text
-print (f"Query text: {query_text}")
-
-# Print similarities
-for i, text in enumerate(texts):
-    print(f"Similarity with '{text}': {similarities[0][i]}")
-
-
-
-
 # roundTrip callback
 def roundTripCallback(address, *args):
-    #   print(f"{address}: {args}")
-    client.send_message("/result", args)  
-# responding server
+    client.send_message("/query", args)  
+    query_text = args
+    query_embedding = get_word_embedding(query_text)
+    similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
+    # Send similarities to Max
+    for i, text in enumerate(texts):
+        sim = float(similarities[0][i])
+        client.send_message( "/similarity", [text, sim] )  
+
+print("ready")
+# OSC server (Max to Python) #########################
+
 def default_handler(address, *args):
-    print(f"UNK {address}: {args}")
+    print(f"Unkown Word {address}: {args}")
 dispatcher = Dispatcher()
 dispatcher.map("/word", roundTripCallback)
 dispatcher.set_default_handler(default_handler)
