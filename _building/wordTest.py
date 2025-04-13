@@ -36,6 +36,7 @@ def get_word_embedding(text):
 texts = ["foo", "bar"]
 embeddings = [get_word_embedding(text) for text in texts]
 
+
 def vocabEmbed(address, *args):
     global texts 
     texts = args
@@ -46,14 +47,20 @@ def vocabEmbed(address, *args):
 
 # word test callback
 def wordTest(address, *args):
+    sims = []
     client.send_message("/query", args)  
     query_text = args
     query_embedding = get_word_embedding(query_text)
     similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
     # Send similarities to Max
     for i, text in enumerate(texts):
+
         sim = float(similarities[0][i])
+        sims.append(sim)
         client.send_message( "/similarity", [text, sim] )  
+    sims.sort(reverse=True)
+    closest = sims[1]
+    client.send_message( "/closest", closest )  
 
 # OSC server (Max to Python) #########################
 def default_handler(address, *args):
