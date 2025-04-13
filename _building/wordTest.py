@@ -21,19 +21,28 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 model = BertModel.from_pretrained('bert-base-uncased')
 print("model loaded")
 
+
+
 # Generate embeddings for texts
+
+def get_word_embedding(text):
+    inputs = tokenizer(text, return_tensors='pt')
+    with torch.no_grad():
+        outputs = model(**inputs)
+    last_hidden_states = outputs.last_hidden_state
+    word_embedding = torch.mean(last_hidden_states, dim=1).numpy()
+    return word_embedding
+
+texts = ["foo", "bar"]
+embeddings = [get_word_embedding(text) for text in texts]
+
 def vocabEmbed(address, *args):
+    global texts 
     texts = args
-    def get_word_embedding(text):
-        inputs = tokenizer(text, return_tensors='pt')
-        with torch.no_grad():
-            outputs = model(**inputs)
-        last_hidden_states = outputs.last_hidden_state
-        word_embedding = torch.mean(last_hidden_states, dim=1).numpy()
-        return word_embedding
+    global embeddings
     embeddings = [get_word_embedding(text) for text in texts]
     print("ready")
-    return
+    return 
 
 # word test callback
 def wordTest(address, *args):
@@ -45,7 +54,6 @@ def wordTest(address, *args):
     for i, text in enumerate(texts):
         sim = float(similarities[0][i])
         client.send_message( "/similarity", [text, sim] )  
-
 
 # OSC server (Max to Python) #########################
 def default_handler(address, *args):
