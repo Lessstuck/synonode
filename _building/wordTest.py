@@ -35,7 +35,8 @@ def get_word_embedding(text):
 
 texts = ["foo", "bar"]
 embeddings = [get_word_embedding(text) for text in texts]
-
+graph = []
+graphBud = "buddy"
 
 def vocabEmbed(address, *args):
     global texts 
@@ -54,7 +55,6 @@ def wordTest(address, *args):
     similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
     # Send similarities to Max
     for i, text in enumerate(texts):
-
         sim = float(similarities[0][i])
         sims.append(sim)
         client.send_message( "/similarity", [text, sim] )  
@@ -62,12 +62,39 @@ def wordTest(address, *args):
     closest = sims[1]
     client.send_message( "/closest", closest )  
 
+# word connect game
+def graphEndpoints(address, *args):
+    graphStart = args[0]
+    graphEnd = args[1]
+    graphBud = graphStart
+    print(wordsStart, wordsEnd)
+
+# this is mostly a copy of word test. TODO generalize
+def graphNext(address, *args):
+    sims = []
+    client.send_message("/next", args)  
+    next_text = args
+    next_embedding = get_word_embedding(next_text)
+    graphBud_embedding = get_word_embedding(graphBud)
+    
+    similarities = cosine_similarity(next_embedding, np.vstack(embeddings))
+    # test for proximity
+    for i, text in enumerate(texts):
+        sim = float(similarities[0][i])
+        sims.append(sim)
+        sims.sort(reverse=True)
+    sims.sort(reverse=True)
+    if sims[1] > .9:
+        print("match")
+
+
 # OSC server (Max to Python) #########################
 def default_handler(address, *args):
     print(f"Unkown Word {address}: {args}")
 dispatcher = Dispatcher()
 dispatcher.map("/word", wordTest)
 dispatcher.map("/vocab", vocabEmbed)
+dispatcher.map("/graphEndpoints", graphEndpoints)
 dispatcher.set_default_handler(default_handler)
 
 server = BlockingOSCUDPServer((ip, portReceive), dispatcher)
