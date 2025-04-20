@@ -36,7 +36,7 @@ def get_word_embedding(text):
 texts = ["foo", "bar"]
 embeddings = [get_word_embedding(text) for text in texts]
 graph = []
-graphBud = "buddy"
+graphBud = ("buddy",)
 
 def vocabEmbed(address, *args):
     global texts 
@@ -64,29 +64,49 @@ def wordTest(address, *args):
 
 # word connect game
 def graphEndpoints(address, *args):
-    graphStart = args[0]
+    global graphBud
+    global graphEnd
+    global graph
+    graphBud = args[0]
     graphEnd = args[1]
-    graphBud = graphStart
-    print(wordsStart, wordsEnd)
+    graph = [graphBud, graphEnd]
 
-# this is mostly a copy of word test. TODO generalize
+    print(f"graph: ", graph)
+
+# # this is mostly a copy of word test. TODO generalize
 def graphNext(address, *args):
     sims = []
+    global graphBud
+    global graphEnd
     client.send_message("/next", args)  
-    next_text = args
-    next_embedding = get_word_embedding(next_text)
-    graphBud_embedding = get_word_embedding(graphBud)
-    
-    similarities = cosine_similarity(next_embedding, np.vstack(embeddings))
-    # test for proximity
-    for i, text in enumerate(texts):
-        sim = float(similarities[0][i])
-        sims.append(sim)
-        sims.sort(reverse=True)
-    sims.sort(reverse=True)
-    if sims[1] > .9:
-        print("match")
+    next_text = args[0]
 
+    graph.remove(graphEnd)
+    if next_text in graph:
+        print("try a different word")
+        graph.append(graphEnd)
+        return
+    graph.append(graphEnd)
+    
+    next_embedding = get_word_embedding(next_text)  
+    similarities = cosine_similarity(next_embedding, np.vstack(embeddings))
+    simBud = 0.
+    simEnd = 0.
+    print(f"graphBud: ", graphBud)
+    for i, text in enumerate(texts):
+        if text == graphBud:
+            simBud = float(similarities[0][i])
+        if text == graphEnd:
+            simEnd = float(similarities[0][i])
+    if simBud > .85:
+        print(f"close to bud: {graphBud}")
+        graph.remove(graphEnd)
+        graph.append(next_text)
+        graph.append(graphEnd)
+        graphBud = next_text
+        print(f"graph: ",graph, "graphBud: ", graphBud)
+    else:
+        print("try again")
 
 # OSC server (Max to Python) #########################
 def default_handler(address, *args):
@@ -95,6 +115,7 @@ dispatcher = Dispatcher()
 dispatcher.map("/word", wordTest)
 dispatcher.map("/vocab", vocabEmbed)
 dispatcher.map("/graphEndpoints", graphEndpoints)
+dispatcher.map("/graphNext", graphNext)
 dispatcher.set_default_handler(default_handler)
 
 server = BlockingOSCUDPServer((ip, portReceive), dispatcher)
