@@ -78,16 +78,21 @@ def graphNext(address, *args):
     sims = []
     global graphBud
     global graphEnd
+    global previousSimBud
     client.send_message("/next", args)  
     next_text = args[0]
 
-    graph.remove(graphEnd)
+    # test last element
+    if next_text == graphEnd:
+        print("you win!")
+        return
+
+    # test all elements
     if next_text in graph:
         print("try a different word")
-        graph.append(graphEnd)
         return
-    graph.append(graphEnd)
-    
+
+    # calculate semantic similarities
     next_embedding = get_word_embedding(next_text)  
     similarities = cosine_similarity(next_embedding, np.vstack(embeddings))
     simBud = 0.
@@ -98,13 +103,20 @@ def graphNext(address, *args):
             simBud = float(similarities[0][i])
         if text == graphEnd:
             simEnd = float(similarities[0][i])
-    if simBud > .85:
+    # is choice valid?
+    def simBudHood():
+        return (simBud > .80)
+    def simEndHood():
+        return (simEnd > .80)
+    if (simBudHood() and simEndHood()):
         print(f"close to bud: {graphBud}")
+        # add next_text as penulitmate element
         graph.remove(graphEnd)
         graph.append(next_text)
         graph.append(graphEnd)
         graphBud = next_text
-        print(f"graph: ",graph, "graphBud: ", graphBud)
+        previousSimBud = simBud
+        print(f"graph: ",graph)
     else:
         print("try again")
 
