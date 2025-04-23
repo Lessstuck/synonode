@@ -19,6 +19,7 @@ client = SimpleUDPClient(ip, portSend)  # Create client
 # Load pre-trained model and tokenizer
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 model = BertModel.from_pretrained('bert-base-uncased')
+client.send_message( "/response", 'model loaded' ) 
 print("model loaded")
 
 
@@ -43,6 +44,7 @@ def vocabEmbed(address, *args):
     texts = args
     global embeddings
     embeddings = [get_word_embedding(text) for text in texts]
+    client.send_message( "/response", "ready" ) 
     print("ready")
     return 
 
@@ -62,7 +64,7 @@ def wordTest(address, *args):
     closest = sims[1]
     client.send_message( "/closest", closest )  
 
-# word connect game
+# word connect game - set end points
 def graphEndpoints(address, *args):
     global graphBud
     global graphEnd
@@ -70,10 +72,9 @@ def graphEndpoints(address, *args):
     graphBud = args[0]
     graphEnd = args[1]
     graph = [graphBud, graphEnd]
+    client.send_message( "/graph", graph ) 
 
-    print(f"graph: ", graph)
-
-# # this is mostly a copy of word test. TODO generalize
+# word connect game - next word
 def graphNext(address, *args):
     sims = []
     global graphBud
@@ -84,12 +85,13 @@ def graphNext(address, *args):
 
     # test last element
     if next_text == graphEnd:
-        print("you win!")
+        client.send_message( "/response", "you win!" ) 
+        # print("you win!")
         return
 
     # test all elements
     if next_text in graph:
-        print("try a different word")
+        client.send_message( "/response", "try a different word" ) 
         return
 
     # calculate semantic similarities
@@ -97,7 +99,6 @@ def graphNext(address, *args):
     similarities = cosine_similarity(next_embedding, np.vstack(embeddings))
     simBud = 0.
     simEnd = 0.
-    print(f"graphBud: ", graphBud)
     for i, text in enumerate(texts):
         if text == graphBud:
             simBud = float(similarities[0][i])
@@ -109,16 +110,16 @@ def graphNext(address, *args):
     def simEndHood():
         return (simEnd > .80)
     if (simBudHood() and simEndHood()):
-        print(f"close to bud: {graphBud}")
         # add next_text as penulitmate element
         graph.remove(graphEnd)
         graph.append(next_text)
         graph.append(graphEnd)
         graphBud = next_text
         previousSimBud = simBud
-        print(f"graph: ",graph)
+        client.send_message( "/graph", graph ) 
+        client.send_message( "/response", "nice!" )
     else:
-        print("try again")
+        client.send_message( "/response", "try again" )
 
 # OSC server (Max to Python) #########################
 def default_handler(address, *args):

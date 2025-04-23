@@ -46,9 +46,9 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 138.0, 76.0, 76.0, 24.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 53.0, 84.0, 130.0, 24.0 ],
+					"presentation_rect" : [ 53.0, 83.0, 130.0, 24.0 ],
 					"text" : "#1",
-					"textcolor" : [ 0.847058823529412, 0.211764705882353, 0.0, 1.0 ]
+					"textcolor" : [ 1.0, 1.0, 1.0, 1.0 ]
 				}
 
 			}
@@ -69,6 +69,7 @@
 				"box" : 				{
 					"floatoutput" : 1,
 					"id" : "obj-10",
+					"knobcolor" : [ 0.105882352941176, 0.419607843137255, 0.019607843137255, 1.0 ],
 					"maxclass" : "slider",
 					"numinlets" : 1,
 					"numoutlets" : 1,
@@ -116,7 +117,7 @@
 
 			}
  ],
-		"originid" : "pat-57",
+		"originid" : "pat-482",
 		"dependency_cache" : [  ],
 		"autosave" : 0
 	}
