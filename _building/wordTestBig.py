@@ -14,6 +14,17 @@ portReceive = 1337
 portSend = 1338
 client = SimpleUDPClient(ip, portSend)  # Create client
 
+
+# Load vocabulary from disk file ######################
+def load_words():
+    with open('words_alphaX.txt') as word_file:
+        valid_words = set(word_file.read().split())
+    return valid_words
+word_alpha = load_words()
+english_words = [item for item in word_alpha]
+# print('english_words' , english_words)
+
+
 # BERT ################################################
 
 # Load pre-trained model and tokenizer
@@ -27,45 +38,73 @@ print("model loaded")
 # Generate embeddings for texts
 
 def get_word_embedding(text):
-    inputs = tokenizer(text, return_tensors='pt')
+    inputs = tokenizer(text,
+        padding=True,              
+        truncation=True,  
+        return_tensors='pt')
     with torch.no_grad():
         outputs = model(**inputs)
     last_hidden_states = outputs.last_hidden_state
     word_embedding = torch.mean(last_hidden_states, dim=1).numpy()
+    # print("one word_embedding done…")
     return word_embedding
 
 texts = ["foo", "bar"]
-embeddings = [get_word_embedding(text) for text in texts]
+embeddings = [get_word_embedding(text) for text in texts]  #seems like a lot of math for a declaration?
 graph = []
 global graphBud
 graphBud = ("buddy",)
 
-
-
-def vocabEmbed(address, *args):
+# Embedding for big vocab english_words
+def vocabEmbed(*args):
     global texts 
     texts = args
     global embeddings
     embeddings = [get_word_embedding(text) for text in texts]
     client.send_message( "/response", "ready" ) 
-    print("ready")
+    print("embeddings done! ready to play")
     return 
+
+
+
+texts = ["foo", "bar"]
+embeddings = [get_word_embedding(text) for text in texts]
+graph = []
+# global graphBud
+# graphBud = ("buddy",)
+
+vocabEmbed(english_words)
+print("embedded")
+
+# def vocabEmbed(address, *args):
+#     global texts 
+#     texts = args
+#     global embeddings
+#     embeddings = [get_word_embedding(text) for text in texts]
+#     client.send_message( "/response", "ready" ) 
+#     print("ready")
+#     return 
 
 # word test callback
 def wordTest(address, *args):
+    global sims
     sims = []
     client.send_message("/query", args)  
     query_text = args
     query_embedding = get_word_embedding(query_text)
     similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
+    # print("similarities", similarities)
     # Send similarities to Max
+    print("text length: ", len(texts))
     for i, text in enumerate(texts):
         sim = float(similarities[0][i])
         sims.append(sim)
-        client.send_message( "/similarity", [text, sim] )  
-    sims.sort(reverse=True)
-    closest = sims[1]
-    client.send_message( "/closest", closest )  
+        print("i: ", i, "sims", sims)
+        # client.send_message( "/similarity", [text, sim] )  
+    # sims.sort(reverse=True)
+    # closest = sims[1]
+    # client.send_message( "/closest", closest )  
+    print("sims", sims)
 
 # word connect game - set end points
 def graphEndpoints(address, *args):
@@ -130,7 +169,7 @@ def default_handler(address, *args):
     print(f"Unkown Word {address}: {args}")
 dispatcher = Dispatcher()
 dispatcher.map("/word", wordTest)
-dispatcher.map("/vocab", vocabEmbed)
+# dispatcher.map("/vocab", vocabEmbed)
 dispatcher.map("/graphEndpoints", graphEndpoints)
 dispatcher.map("/graphNext", graphNext)
 dispatcher.set_default_handler(default_handler)
