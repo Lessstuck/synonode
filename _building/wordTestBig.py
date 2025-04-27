@@ -15,14 +15,19 @@ portSend = 1338
 client = SimpleUDPClient(ip, portSend)  # Create client
 
 
-# Load vocabulary from disk file ######################
+
+
+
+
+
+
+# Load vocabulary
 def load_words():
     with open('words_alphaX.txt') as word_file:
         valid_words = set(word_file.read().split())
     return valid_words
 word_alpha = load_words()
 english_words = [item for item in word_alpha]
-# print('english_words' , english_words)
 
 
 # BERT ################################################
@@ -32,8 +37,6 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 model = BertModel.from_pretrained('bert-base-uncased')
 client.send_message( "/response", 'model loaded' ) 
 print("model loaded")
-
-
 
 # Generate embeddings for texts
 
@@ -50,22 +53,21 @@ def get_word_embedding(text):
     return word_embedding
 
 texts = ["foo", "bar"]
-embeddings = [get_word_embedding(text) for text in texts]  #seems like a lot of math for a declaration?
+embeddings = []
 graph = []
 global graphBud
 graphBud = ("buddy",)
 
-# Embedding for big vocab english_words
+# Embed vocabulary
 def vocabEmbed(*args):
     global texts 
     texts = args
     global embeddings
     embeddings = [get_word_embedding(text) for text in texts]
+    texts = texts[0]
     client.send_message( "/response", "ready" ) 
     print("embeddings done! ready to play")
     return 
-
-
 
 texts = ["foo", "bar"]
 embeddings = [get_word_embedding(text) for text in texts]
@@ -74,16 +76,6 @@ graph = []
 # graphBud = ("buddy",)
 
 vocabEmbed(english_words)
-print("embedded")
-
-# def vocabEmbed(address, *args):
-#     global texts 
-#     texts = args
-#     global embeddings
-#     embeddings = [get_word_embedding(text) for text in texts]
-#     client.send_message( "/response", "ready" ) 
-#     print("ready")
-#     return 
 
 # word test callback
 def wordTest(address, *args):
@@ -93,18 +85,9 @@ def wordTest(address, *args):
     query_text = args
     query_embedding = get_word_embedding(query_text)
     similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
-    # print("similarities", similarities)
-    # Send similarities to Max
-    print("text length: ", len(texts))
     for i, text in enumerate(texts):
         sim = float(similarities[0][i])
         sims.append(sim)
-        print("i: ", i, "sims", sims)
-        # client.send_message( "/similarity", [text, sim] )  
-    # sims.sort(reverse=True)
-    # closest = sims[1]
-    # client.send_message( "/closest", closest )  
-    print("sims", sims)
 
 # word connect game - set end points
 def graphEndpoints(address, *args):
@@ -116,7 +99,17 @@ def graphEndpoints(address, *args):
     graph = [graphBud, graphEnd]
     client.send_message( "/graph", graph ) 
 
-# word connect game - next word
+# word connect game - next word ##########################
+# sets radius of next_word neighborhood 
+simBudRadius = .5
+simEndRadius = .5
+def setSimBudRadius(address, *args):
+    global simBudRadius
+    simBudRadius = args[0]
+def setSimEndRadius(address, *args):
+    global simEndRadius
+    simEndRadius = args[0]
+
 def graphNext(address, *args):
     sims = []
     global graphBud
@@ -149,9 +142,10 @@ def graphNext(address, *args):
             simEnd = float(similarities[0][i])
     # is choice valid?
     def simBudHood():
-        return (simBud > .80)
+        return (simBud > simBudRadius)
     def simEndHood():
-        return (simEnd > .80)
+        return (simEnd > simEndRadius)
+    print("simBud:    ", simBud, "simEnd", simEnd)
     if (simBudHood() and simEndHood()):
         # add next_text as penulitmate element
         graph.remove(graphEnd)
@@ -164,12 +158,18 @@ def graphNext(address, *args):
     else:
         client.send_message( "/response", "try again" )
 
+
+
+
+
+
 # OSC server (Max to Python) #########################
 def default_handler(address, *args):
     print(f"Unkown Word {address}: {args}")
 dispatcher = Dispatcher()
+dispatcher.map("/setSimBudRadius", setSimBudRadius)
+dispatcher.map("/setSimEndRadius", setSimEndRadius)
 dispatcher.map("/word", wordTest)
-# dispatcher.map("/vocab", vocabEmbed)
 dispatcher.map("/graphEndpoints", graphEndpoints)
 dispatcher.map("/graphNext", graphNext)
 dispatcher.set_default_handler(default_handler)
