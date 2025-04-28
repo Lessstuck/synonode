@@ -14,16 +14,9 @@ portReceive = 1337
 portSend = 1338
 client = SimpleUDPClient(ip, portSend)  # Create client
 
-
-
-
-
-
-
-
 # Load vocabulary
 def load_words():
-    with open('words_alphaX.txt') as word_file:
+    with open('wordsEF3000.txt') as word_file:
         valid_words = set(word_file.read().split())
     return valid_words
 word_alpha = load_words()
@@ -72,8 +65,6 @@ def vocabEmbed(*args):
 texts = ["foo", "bar"]
 embeddings = [get_word_embedding(text) for text in texts]
 graph = []
-# global graphBud
-# graphBud = ("buddy",)
 
 vocabEmbed(english_words)
 
@@ -83,11 +74,15 @@ def wordTest(address, *args):
     sims = []
     client.send_message("/query", args)  
     query_text = args
-    query_embedding = get_word_embedding(query_text)
-    similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
-    for i, text in enumerate(texts):
-        sim = float(similarities[0][i])
-        sims.append(sim)
+    print("query_text:  ", query_text)
+    if query_text[0] not in texts:
+        client.send_message( "/response", "word not in vocabulary" ) 
+    else:
+        query_embedding = get_word_embedding(query_text)
+        similarities = cosine_similarity(query_embedding, np.vstack(embeddings))
+        for i, text in enumerate(texts):
+            sim = float(similarities[0][i])
+            sims.append(sim)
 
 # word connect game - set end points
 def graphEndpoints(address, *args):
@@ -96,6 +91,13 @@ def graphEndpoints(address, *args):
     global graph
     graphBud = args[0]
     graphEnd = args[1]
+    #test if it's a legal word
+    # if graphBud not in texts:
+    #     client.send_message( "/response", "start word not in vocabulary" ) 
+    #     return
+    # if graphBud not in texts:
+    #     client.send_message( "/response", "end word not in vocabulary" ) 
+    #     return
     graph = [graphBud, graphEnd]
     client.send_message( "/graph", graph ) 
 
@@ -118,7 +120,11 @@ def graphNext(address, *args):
     global previousSimBud
     client.send_message("/next", args)  
     next_text = args[0]
-
+    print("next_text: ", next_text)
+    #test if it's a legal word
+    if next_text not in texts:
+        client.send_message( "/response", "word not in vocabulary" ) 
+        return
     # test last element
     if next_text == graphEnd:
         client.send_message( "/response", "you win!" ) 
@@ -140,6 +146,8 @@ def graphNext(address, *args):
             simBud = float(similarities[0][i])
         if text == graphEnd:
             simEnd = float(similarities[0][i])
+    print("graphEnd:  ", graphEnd ,"simEnd:  ", simEnd)
+    print("graphBud:  ", graphBud, "simBud: ", simBud)
     # is choice valid?
     def simBudHood():
         return (simBud > simBudRadius)
