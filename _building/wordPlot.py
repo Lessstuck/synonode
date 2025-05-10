@@ -4,6 +4,13 @@ import torch
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+# unused but required import for doing 3d projections with matplotlib < 3.2
+import mpl_toolkits.mplot3d  # noqa: F401
+from sklearn.decomposition import PCA
+
 # OSC client (Python to Max) #########################
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
@@ -50,6 +57,7 @@ embeddings = []
 graph = []
 global graphBud
 graphBud = ("buddy",)
+graphEnd = ("cow",)
 
 # Embed vocabulary
 def vocabEmbed(*args):
@@ -112,6 +120,37 @@ def setSimEndRadius(address, *args):
     global simEndRadius
     simEndRadius = args[0]
 
+def plotGraph(graf):
+    fig = plt.figure(1, figsize=(8, 6))
+    ax = fig.add_subplot(111)
+
+    X_reduced = PCA(n_components=2).fit_transform(graf)
+    scatter = ax.scatter(
+        X_reduced[:, 0],
+        X_reduced[:, 1],
+        # c=graf.target,
+        s=40,
+    )
+
+    ax.set(
+        title="First two PCA dimensions",
+        xlabel="1st Eigenvector",
+        ylabel="2nd Eigenvector",
+    )
+    ax.xaxis.set_ticklabels([])
+    ax.yaxis.set_ticklabels([])
+
+    # Add a legend
+    legend1 = ax.legend(
+        scatter.legend_elements()[0],
+        # iris.target_names.tolist(),
+        loc="upper right",
+        title="Classes",
+    )
+    ax.add_artist(legend1)
+
+    plt.show()
+
 def graphNext(address, *args):
     sims = []
     global graphBud
@@ -153,7 +192,6 @@ def graphNext(address, *args):
         return (simBud > simBudRadius)
     def simEndHood():
         return (simEnd > simEndRadius)
-    print("simBud:    ", simBud, "simEnd", simEnd)
     if (simBudHood() and simEndHood()):
         # add next_text as penulitmate element
         graph.remove(graphEnd)
@@ -161,7 +199,16 @@ def graphNext(address, *args):
         graph.append(graphEnd)
         graphBud = next_text
         previousSimBud = simBud
-        print(type(graph))
+        embedBud = get_word_embedding(graphBud)
+        embedEnd = get_word_embedding(graphEnd)
+        embedBud = embedBud[0]
+        embedEnd = embedEnd[0]
+        list_of_tuples = list(zip(embedBud, embedEnd))
+        list_of_tuples
+        graphDF = pd.DataFrame(list_of_tuples, columns=['bud', 'end'])
+        print(graphDF)
+        plotGraph(graphDF)
+
         client.send_message( "/graph", graph ) 
         client.send_message( "/response",  "nice!")
     else:

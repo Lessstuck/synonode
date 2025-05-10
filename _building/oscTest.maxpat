@@ -15,6 +15,34 @@
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-12",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 578.0, 19.0, 58.0, 22.0 ],
+					"presentation" : 1,
+					"presentation_rect" : [ 410.0, 242.0, 61.0, 22.0 ],
+					"text" : "mountain"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-11",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 193.0, 19.0, 76.0, 22.0 ],
+					"presentation" : 1,
+					"presentation_rect" : [ 134.0, 247.0, 61.0, 22.0 ],
+					"text" : "river peak"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-114",
 					"maxclass" : "message",
 					"numinlets" : 2,
@@ -23,7 +51,7 @@
 					"patching_rect" : [ 663.0, 137.0, 148.0, 22.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 479.5, 242.0, 148.0, 22.0 ],
-					"text" : "apple"
+					"text" : "mountain"
 				}
 
 			}
@@ -37,7 +65,7 @@
 					"patching_rect" : [ 414.0, 176.0, 148.0, 22.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 197.0, 247.0, 148.0, 22.0 ],
-					"text" : "river bank"
+					"text" : "river peak"
 				}
 
 			}
@@ -195,7 +223,7 @@
 
 							}
  ],
-						"originid" : "pat-379"
+						"originid" : "pat-7"
 					}
 ,
 					"patching_rect" : [ 635.0, 93.0, 183.0, 34.0 ],
@@ -359,7 +387,7 @@
 
 							}
  ],
-						"originid" : "pat-376"
+						"originid" : "pat-10"
 					}
 ,
 					"patching_rect" : [ 446.0, 93.0, 183.0, 34.0 ],
@@ -523,7 +551,7 @@
 
 							}
  ],
-						"originid" : "pat-373"
+						"originid" : "pat-13"
 					}
 ,
 					"patching_rect" : [ 256.0, 93.0, 183.0, 34.0 ],
@@ -687,7 +715,7 @@
 
 							}
  ],
-						"originid" : "pat-370"
+						"originid" : "pat-16"
 					}
 ,
 					"patching_rect" : [ 64.0, 93.0, 183.0, 34.0 ],
@@ -816,7 +844,7 @@
 					"patching_rect" : [ 278.0, 447.0, 670.0, 26.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 334.0, 271.0, 146.0, 26.0 ],
-					"text" : "nice!"
+					"text" : "ready"
 				}
 
 			}
@@ -844,7 +872,7 @@
 					"patching_rect" : [ 278.0, 414.0, 670.0, 26.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 83.0, 342.0, 670.0, 26.0 ],
-					"text" : "river water boat apple bank"
+					"text" : "river peak"
 				}
 
 			}
@@ -942,12 +970,13 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-47",
+					"linecount" : 2,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 185.0, 413.0, 50.0, 22.0 ],
-					"text" : "apple"
+					"patching_rect" : [ 185.0, 413.0, 50.0, 35.0 ],
+					"text" : "mountain"
 				}
 
 			}
@@ -1067,6 +1096,13 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-104", 0 ],
+					"source" : [ "obj-11", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-104", 1 ],
 					"source" : [ "obj-110", 0 ]
 				}
@@ -1085,6 +1121,13 @@
 					"destination" : [ "obj-44", 0 ],
 					"order" : 1,
 					"source" : [ "obj-111", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-44", 0 ],
+					"source" : [ "obj-12", 0 ]
 				}
 
 			}
@@ -1208,7 +1251,7 @@
 
 			}
  ],
-		"originid" : "pat-220",
+		"originid" : "pat-4",
 		"dependency_cache" : [ 			{
 				"name" : "OSC-route.mxo",
 				"type" : "iLaX"

@@ -1,5 +1,6 @@
 numpy
 scipy
+pandas
 torch
 transformers
 scikit-learn
