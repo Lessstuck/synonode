@@ -201,18 +201,10 @@ def graphNext(address, *args):
         previousSimBud = simBud
         embedBud = get_word_embedding(graphBud)
         embedEnd = get_word_embedding(graphEnd)
-        embedBud = embedBud.transpose()
-        embedEnd = embedEnd.transpose()
-        # print(embedBud)
-        # print(type(embedBud), "___", embedBud.shape)
-        # embedZipped = np.array(zip(embedBud, embedEnd))
-        embedBoth = np.column_stack((embedBud, embedEnd))
-        embedBoth = embedBoth.T
-        # print(embedBoth.shape)
-        # list_of_tuples = np.array(list_of_tuples)
-        # transposedList = list_of_tuples.T
-        # print(transposedList)
-        # print("list_of_tuples:      ", list_of_tuples)
+        # embedBud = embedBud.transpose()
+        # embedEnd = embedEnd.transpose()
+        embedBoth = np.row_stack((embedBud, embedEnd))
+        # embedBoth = embedBoth.T
         graphDF = pd.DataFrame(embedBoth)
         print(graphDF)
         plotGraph(graphDF)
