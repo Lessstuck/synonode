@@ -199,14 +199,18 @@ def graphNext(address, *args):
         graph.append(graphEnd)
         graphBud = next_text
         previousSimBud = simBud
-        embedBud = get_word_embedding(graphBud)
-        embedEnd = get_word_embedding(graphEnd)
-        # embedBud = embedBud.transpose()
-        # embedEnd = embedEnd.transpose()
-        embedBoth = np.row_stack((embedBud, embedEnd))
-        # embedBoth = embedBoth.T
+
+        # display ######################################################################
+        global embedGraph
+        global embedNode
+        embedGraph = []
+        for i, graphNode in enumerate(graph):
+                embedNode = get_word_embedding(graphNode).tolist()
+                embedGraph = embedGraph + embedNode
+        embedGraph = np.array(embedGraph) 
+        embedBoth = np.vstack(embedGraph)
         graphDF = pd.DataFrame(embedBoth)
-        print(graphDF)
+        # print(graphDF)
         plotGraph(graphDF)
 
         client.send_message( "/graph", graph ) 
