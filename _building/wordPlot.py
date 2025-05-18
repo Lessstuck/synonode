@@ -122,12 +122,13 @@ def setSimEndRadius(address, *args):
 
 def plotGraph(graf):
     fig = plt.figure(1, figsize=(8, 6))
-    ax = fig.add_subplot(111)
+    ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
 
-    X_reduced = PCA(n_components=2).fit_transform(graf)
+    X_reduced = PCA(n_components=3).fit_transform(graf)
     scatter = ax.scatter(
         X_reduced[:, 0],
         X_reduced[:, 1],
+        X_reduced[:, 2],
         # c=graf.target,
         s=40,
     )
@@ -136,9 +137,11 @@ def plotGraph(graf):
         title="First two PCA dimensions",
         xlabel="1st Eigenvector",
         ylabel="2nd Eigenvector",
+        zlabel="3rd Eigenvector",
     )
     ax.xaxis.set_ticklabels([])
     ax.yaxis.set_ticklabels([])
+    ax.zaxis.set_ticklabels([])
 
     # Add a legend
     legend1 = ax.legend(
@@ -200,7 +203,7 @@ def graphNext(address, *args):
         graphBud = next_text
         previousSimBud = simBud
 
-        # display ######################################################################
+        # display
         global embedGraph
         global embedNode
         embedGraph = []
