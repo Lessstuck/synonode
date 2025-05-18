@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d  # noqa: F401
 from sklearn.decomposition import PCA
 
+import json
 # OSC client (Python to Max) #########################
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import BlockingOSCUDPServer
@@ -123,16 +124,14 @@ def setSimEndRadius(address, *args):
 def plotGraph(graf):
     fig = plt.figure(1, figsize=(8, 6))
     ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
-
-    X_reduced = PCA(n_components=3).fit_transform(graf)
     scatter = ax.scatter(
         X_reduced[:, 0],
         X_reduced[:, 1],
         X_reduced[:, 2],
         # c=graf.target,
+        c=[[1, 0, 0],[0, 1, 0],[0, 0, 1]],
         s=40,
     )
-
     ax.set(
         title="First two PCA dimensions",
         xlabel="1st Eigenvector",
@@ -213,8 +212,11 @@ def graphNext(address, *args):
         embedGraph = np.array(embedGraph) 
         embedBoth = np.vstack(embedGraph)
         graphDF = pd.DataFrame(embedBoth)
-        # print(graphDF)
-        plotGraph(graphDF)
+        X_reduced = PCA(n_components=3).fit_transform(graphDF)
+        pca=X_reduced.tolist()
+        pca_json=json.dumps(pca)
+        client.send_message( "/pca", pca_json ) 
+        # plotGraph(graphDF)    entire python plot is deprecated ################################ PCA OSC
 
         client.send_message( "/graph", graph ) 
         client.send_message( "/response",  "nice!")

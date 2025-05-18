@@ -10,10 +10,23 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 54.0, 148.0, 1085.0, 511.0 ],
+		"rect" : [ 54.0, 148.0, 1085.0, 679.0 ],
 		"openinpresentation" : 1,
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-13",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 459.0, 236.0, 199.0, 22.0 ],
+					"presentation" : 1,
+					"presentation_rect" : [ 83.0, 376.0, 242.0, 22.0 ]
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-12",
 					"maxclass" : "message",
@@ -51,7 +64,7 @@
 					"patching_rect" : [ 663.0, 137.0, 148.0, 22.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 479.5, 242.0, 148.0, 22.0 ],
-					"text" : "mountain"
+					"text" : "at"
 				}
 
 			}
@@ -844,7 +857,7 @@
 					"patching_rect" : [ 278.0, 447.0, 670.0, 26.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 334.0, 271.0, 146.0, 26.0 ],
-					"text" : "ready"
+					"text" : "nice!"
 				}
 
 			}
@@ -872,7 +885,7 @@
 					"patching_rect" : [ 278.0, 414.0, 670.0, 26.0 ],
 					"presentation" : 1,
 					"presentation_rect" : [ 83.0, 342.0, 670.0, 26.0 ],
-					"text" : "river peak"
+					"text" : "river mountain boat car park at peak"
 				}
 
 			}
@@ -970,13 +983,12 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-47",
-					"linecount" : 2,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 185.0, 413.0, 50.0, 35.0 ],
-					"text" : "mountain"
+					"patching_rect" : [ 185.0, 413.0, 50.0, 22.0 ],
+					"text" : "at"
 				}
 
 			}
@@ -1021,10 +1033,10 @@
 					"id" : "obj-2",
 					"maxclass" : "newobj",
 					"numinlets" : 1,
-					"numoutlets" : 7,
-					"outlettype" : [ "", "", "", "", "", "", "" ],
-					"patching_rect" : [ 64.0, 366.0, 323.0, 22.0 ],
-					"text" : "OSC-route /query /similarity /closest /next /graph /response"
+					"numoutlets" : 8,
+					"outlettype" : [ "", "", "", "", "", "", "", "" ],
+					"patching_rect" : [ 64.0, 366.0, 349.0, 22.0 ],
+					"text" : "OSC-route /query /similarity /closest /next /graph /response /pca"
 				}
 
 			}
@@ -1136,6 +1148,13 @@
 					"destination" : [ "obj-1", 0 ],
 					"midpoints" : [ 843.5, 207.6640625, 74.5, 207.6640625 ],
 					"source" : [ "obj-16", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-13", 1 ],
+					"source" : [ "obj-2", 6 ]
 				}
 
 			}
