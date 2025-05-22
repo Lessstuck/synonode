@@ -212,9 +212,12 @@ def graphNext(address, *args):
         embedGraph = np.array(embedGraph) 
         embedBoth = np.vstack(embedGraph)
         graphDF = pd.DataFrame(embedBoth)
-        X_reduced = PCA(n_components=3).fit_transform(graphDF)
-        pca=X_reduced.tolist()
-        pca_json=json.dumps(pca)
+
+        X_reduced = PCA(n_components=3).fit_transform(graphDF)  # ndarray of shape (n_samples, n_components)
+        print("X_reduced:  ", X_reduced)
+        Xdf = pd.DataFrame(X_reduced, columns=graph)
+        pca_json = Xdf.to_json()
+        print("_____pca_json:  ", pca_json)
         client.send_message( "/pca", pca_json ) 
         # plotGraph(graphDF)    entire python plot is deprecated ################################ PCA OSC
 
