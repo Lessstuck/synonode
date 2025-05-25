@@ -75,6 +75,7 @@ vocabEmbed(english_words)
 # word test callback
 def wordTest(address, *args):
     global sims
+    
     sims = []
     client.send_message("/query", args)  
     query_text = args
