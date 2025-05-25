@@ -5,10 +5,6 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-# unused but required import for doing 3d projections with matplotlib < 3.2
-import mpl_toolkits.mplot3d  # noqa: F401
 from sklearn.decomposition import PCA
 
 import json
@@ -50,7 +46,6 @@ def get_word_embedding(text):
         outputs = model(**inputs)
     last_hidden_states = outputs.last_hidden_state
     word_embedding = torch.mean(last_hidden_states, dim=1).numpy()
-    # print("one word_embedding done…")
     return word_embedding
 
 texts = ["foo", "bar"]
@@ -121,38 +116,6 @@ def setSimEndRadius(address, *args):
     global simEndRadius
     simEndRadius = args[0]
 
-def plotGraph(graf):
-    fig = plt.figure(1, figsize=(8, 6))
-    ax = fig.add_subplot(111, projection="3d", elev=-150, azim=110)
-    scatter = ax.scatter(
-        X_reduced[:, 0],
-        X_reduced[:, 1],
-        X_reduced[:, 2],
-        # c=graf.target,
-        c=[[1, 0, 0],[0, 1, 0],[0, 0, 1]],
-        s=40,
-    )
-    ax.set(
-        title="First two PCA dimensions",
-        xlabel="1st Eigenvector",
-        ylabel="2nd Eigenvector",
-        zlabel="3rd Eigenvector",
-    )
-    ax.xaxis.set_ticklabels([])
-    ax.yaxis.set_ticklabels([])
-    ax.zaxis.set_ticklabels([])
-
-    # Add a legend
-    legend1 = ax.legend(
-        scatter.legend_elements()[0],
-        # iris.target_names.tolist(),
-        loc="upper right",
-        title="Classes",
-    )
-    ax.add_artist(legend1)
-
-    plt.show()
-
 def graphNext(address, *args):
     sims = []
     global graphBud
@@ -213,16 +176,9 @@ def graphNext(address, *args):
         graphDF = pd.DataFrame(embedBoth)
 
         X_reduced = PCA(n_components=3).fit_transform(graphDF)  # ndarray of shape (n_samples, n_components)
-        print("X_reduced:  ", X_reduced)
-        print("X_reduced_shape:  ", X_reduced.shape)
-        print("graph:   ", graph)
         Xdf = pd.DataFrame(X_reduced, columns=['X', 'Y', 'Z'], index=graph)
-        print(Xdf)
         pca_json = Xdf.to_json(orient='index')
-        print("_____pca_json:  ", pca_json)
         client.send_message( "/pca", pca_json ) 
-        # plotGraph(graphDF)    entire python plot is deprecated ################################ PCA OSC
-
         client.send_message( "/graph", graph ) 
         client.send_message( "/response",  "nice!")
     else:
