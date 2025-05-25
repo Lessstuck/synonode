@@ -201,7 +201,6 @@ def graphNext(address, *args):
         graph.append(graphEnd)
         graphBud = next_text
         previousSimBud = simBud
-
         # display
         global embedGraph
         global embedNode
@@ -215,8 +214,11 @@ def graphNext(address, *args):
 
         X_reduced = PCA(n_components=3).fit_transform(graphDF)  # ndarray of shape (n_samples, n_components)
         print("X_reduced:  ", X_reduced)
-        Xdf = pd.DataFrame(X_reduced, columns=graph)
-        pca_json = Xdf.to_json()
+        print("X_reduced_shape:  ", X_reduced.shape)
+        print("graph:   ", graph)
+        Xdf = pd.DataFrame(X_reduced, columns=['X', 'Y', 'Z'], index=graph)
+        print(Xdf)
+        pca_json = Xdf.to_json(orient='index')
         print("_____pca_json:  ", pca_json)
         client.send_message( "/pca", pca_json ) 
         # plotGraph(graphDF)    entire python plot is deprecated ################################ PCA OSC
